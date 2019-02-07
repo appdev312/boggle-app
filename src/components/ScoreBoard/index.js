@@ -1,11 +1,12 @@
 import React, { Component } from "react";
 import _ from "lodash";
 
+export function calcTotalScore(scores) {
+  return _.sumBy(scores, "score");
+}
 class ScoreBoard extends Component {
   calcTotalScore() {
-    const { scores } = this.props;
-
-    return _.sumBy(scores, "score");
+    return calcTotalScore(this.props.scores);
   }
 
   render() {

@@ -2,7 +2,9 @@ import React, { Component } from "react";
 import _ from "lodash";
 
 import Cell from "../Cell";
-import ScoreBoard from "../ScoreBoard";
+import Clock from "../Clock";
+import ScoreBoard, { calcTotalScore } from "../ScoreBoard";
+import ScoreHistory from "../ScoreHistory";
 import { calculateScore, isValidWord, DICE } from "../../modules/util";
 import "./index.css";
 
@@ -21,10 +23,12 @@ class Board extends Component {
       letterPositions: [],
       word: "",
       results: [],
-      startTime: null
+      startTime: new Date(),
+      records: []
     };
 
     this.onClickSubmit = this.onClickSubmit.bind(this);
+    this.onTimeout = this.onTimeout.bind(this);
   }
 
   componentDidMount() {
@@ -108,8 +112,26 @@ class Board extends Component {
     this.reset();
   }
 
+  onTimeout() {
+    const { records } = this.state;
+
+    const score = calcTotalScore(this.state.results);
+    const name = prompt(`Total Score: ${score}`, "");
+
+    records.push({
+      score,
+      name
+    });
+
+    this.setState({
+      records,
+      results: [],
+      startTime: new Date()
+    });
+  }
+
   render() {
-    const { board, word, results } = this.state;
+    const { board, word, results, startTime, records } = this.state;
 
     return (
       <div className="board">
@@ -134,6 +156,8 @@ class Board extends Component {
           <input type="button" onClick={this.onClickSubmit} value="Submit" />
         </div>
         <ScoreBoard scores={results} />
+        <Clock startTime={startTime} onTimeout={this.onTimeout} />
+        <ScoreHistory records={records} />
       </div>
     );
   }
