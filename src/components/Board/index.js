@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import _ from "lodash";
 
-import Cell, { DICE } from "../Cell";
+import Cell from "../Cell";
+import ScoreBoard from "../ScoreBoard";
+import { calculateScore, isValidWord, DICE } from "../../modules/util";
 import "./index.css";
 
 class Board extends Component {
@@ -17,15 +19,19 @@ class Board extends Component {
         [null, null, null, null, null]
       ],
       letterPositions: [],
-      word: ""
+      word: "",
+      results: [],
+      startTime: null
     };
+
+    this.onClickSubmit = this.onClickSubmit.bind(this);
   }
 
   componentDidMount() {
-    this.randomize();
+    this.reset();
   }
 
-  randomize() {
+  reset() {
     const _randomDice = _.shuffle(_.range(25));
     const _board = [[], [], [], [], []];
 
@@ -37,7 +43,9 @@ class Board extends Component {
     });
 
     this.setState({
-      board: _board
+      board: _board,
+      letterPositions: [],
+      word: ""
     });
   }
 
@@ -79,8 +87,29 @@ class Board extends Component {
     });
   }
 
+  async onClickSubmit(ev) {
+    ev.preventDefault();
+
+    const { word, results } = this.state;
+    const isValid = await isValidWord(word);
+    if (!isValid) {
+      results.push({
+        score: -2,
+        word
+      });
+    } else {
+      results.push({
+        score: calculateScore(word),
+        word
+      });
+    }
+
+    this.setState({ results });
+    this.reset();
+  }
+
   render() {
-    const { board, word } = this.state;
+    const { board, word, results } = this.state;
 
     return (
       <div className="board">
@@ -101,6 +130,10 @@ class Board extends Component {
           </div>
         ))}
         {word}
+        <div className="actions">
+          <input type="button" onClick={this.onClickSubmit} value="Submit" />
+        </div>
+        <ScoreBoard scores={results} />
       </div>
     );
   }
