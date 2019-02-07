@@ -2,7 +2,7 @@ import React, { Component } from "react";
 
 import "./index.css";
 
-const DICE = [
+export const DICE = [
   ["a", "a", "a", "f", "r", "s"],
   ["a", "a", "e", "e", "e", "e"],
   ["a", "a", "f", "i", "r", "s"],
@@ -32,9 +32,13 @@ const DICE = [
 
 class Cell extends Component {
   render() {
-    const { dice, face } = this.props;
+    const { dice, face, isVisited, onClick } = this.props;
 
-    return <div className="cell">{DICE[dice][face]}</div>;
+    return (
+      <div className={"cell " + (isVisited ? "visited" : "")} onClick={onClick}>
+        {DICE[dice][face]}
+      </div>
+    );
   }
 }
 

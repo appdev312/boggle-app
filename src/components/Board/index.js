@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import _ from "lodash";
 
-import Cell from "../Cell";
+import Cell, { DICE } from "../Cell";
 import "./index.css";
 
 class Board extends Component {
@@ -15,7 +15,9 @@ class Board extends Component {
         [null, null, null, null, null],
         [null, null, null, null, null],
         [null, null, null, null, null]
-      ]
+      ],
+      letterPositions: [],
+      word: ""
     };
   }
 
@@ -39,8 +41,46 @@ class Board extends Component {
     });
   }
 
+  isClickValid(row, col) {
+    const { letterPositions } = this.state;
+
+    if (letterPositions.length === 0) {
+      return true;
+    }
+
+    const lastElem = letterPositions[letterPositions.length - 1];
+    return (
+      !(lastElem.row === row && lastElem.col === col) &&
+      Math.abs(lastElem.row - row) <= 1 &&
+      Math.abs(lastElem.col - col) <= 1
+    );
+  }
+
+  isVisited(row, col) {
+    const { letterPositions } = this.state;
+    return _.findIndex(letterPositions, { row, col }) > -1;
+  }
+
+  onClickCell(row, col) {
+    const { board, letterPositions, word } = this.state;
+
+    if (!this.isClickValid(row, col)) {
+      return;
+    }
+
+    letterPositions.push({
+      row,
+      col
+    });
+
+    this.setState({
+      letterPositions,
+      word: `${word}${DICE[board[row][col].dice][board[row][col].face]}`
+    });
+  }
+
   render() {
-    const { board } = this.state;
+    const { board, word } = this.state;
 
     return (
       <div className="board">
@@ -53,11 +93,14 @@ class Board extends Component {
                     key={`${row}_${col}`}
                     dice={cell.dice}
                     face={cell.face}
+                    isVisited={this.isVisited(row, col)}
+                    onClick={() => this.onClickCell(row, col)}
                   />
                 )
             )}
           </div>
         ))}
+        {word}
       </div>
     );
   }
